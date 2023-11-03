@@ -21,4 +21,7 @@ The project is divided into four scripts:
 
 By following these steps, users can easily scrape, transform, model, and visualize data using the provided shiny app.
 
+
+Link to the Shiny app: https://m-katogui.shinyapps.io/forecasting_corn_area_harvested/
+
 ![image](https://github.com/mkatogui/FAO_Area_Harvested/assets/60530366/ce5cd784-ca41-4cf7-872c-d07f7a1ceb97)
