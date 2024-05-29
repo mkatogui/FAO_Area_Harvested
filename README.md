@@ -21,6 +21,7 @@ The project is divided into four scripts:
 
 By following these steps, users can easily scrape, transform, model, and visualize data using the provided shiny app.
 
+To run the whole project please execute the ***main.R*** script.
 
 Link to the Shiny app: https://m-katogui.shinyapps.io/forecasting_corn_area_harvested/
 
