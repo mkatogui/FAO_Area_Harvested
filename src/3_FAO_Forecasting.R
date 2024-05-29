@@ -26,13 +26,11 @@ lapply(data,head)
 input1 <- "corn"
 
 # Looking for similarities
-print(data$Production_Crops_Livestock_E_ItemCodes %>% 
-  filter(grepl(input1, Item, ignore.case = TRUE)))
+library(stringi)
 
 Show_Filtered <- (data$Production_Crops_Livestock_E_ItemCodes %>% 
-        filter(grepl(input1, Item, ignore.case = TRUE)))
+                    filter(stri_detect_fixed(Item, input1, opts_fixed = list(case_insensitive = TRUE))))
 
-print(Show_Filtered)
 
 input2 <- 2 # the list to select is from Show_Filtered[,1]
 selected_code <- Show_Filtered[input2,1]
