@@ -67,20 +67,27 @@ unlink("DATA/EXTRACTED/", recursive = TRUE)
 
 # Define a function to fit various time series models to a time series
 fit_models <- function(ts_obj) {
+  
+  # Replace any NAs in the "Area_harvested_ha" column with the mean of non-missing values
+  ts_obj[, "Area_harvested_ha"][is.na(ts_obj[, "Area_harvested_ha"])] <- 
+    mean(ts_obj[, "Area_harvested_ha"], na.rm = TRUE)
+  
+  tsObect <- ts_obj[, "Area_harvested_ha"]
+  
   # Fit ARIMA model
-  arima_model <- auto.arima(y = ts_obj[, "Area_harvested_ha"]#, 
+  arima_model <- auto.arima(y = tsObect#, 
                             # approximation = F,
                             # stepwise = F
                             )
   
   # Fit ETS model
-  ets_model <- ets(ts_obj[, "Area_harvested_ha"],na.action="na.contiguous")
+  ets_model <- ets(tsObect,na.action="na.contiguous")
   
   # Fit tbats model
-  tbats_model <- tbats(ts_obj[, "Area_harvested_ha"])
+  tbats_model <- tbats(tsObect)
   
   # Fit nnetar model
-  nnetar_model <- nnetar(ts_obj[, "Area_harvested_ha"])
+  nnetar_model <- nnetar(tsObect)
   
   # Return a list containing all the models
   return(list(arima_model = arima_model,

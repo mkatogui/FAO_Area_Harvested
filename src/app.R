@@ -19,58 +19,45 @@ library(shinythemes)
 library(shinydashboard)
   
 
-ui <- dashboardPage(
-  
-  dashboardHeader(
-    title="Corn: Area Harvested Forecasted",titleWidth = 400),
-  
-  dashboardSidebar(
-    selectInput(inputId = "country",
-                label = "Select a country:",
-                choices = Countries,selected = "Argentina"),
-    actionButton(inputId = "submit",
-                 label = "Generate Plot")
-  ),
-  
-  dashboardBody(
-    fluidRow( 
-      box(plotlyOutput(outputId = "plot"), 
-          title = "Forecasted values", 
-          height = 500, 
-          solidHeader = TRUE, 
-          status = "primary"),
-      
-      box(
-        title = "Results",
-        p("This tool uses forecasting techniques such as ARIMA, ETS, NNETAR, and TBATS to predict the area to be harvested in hectares."),
-          
-        htmlOutput("table"),
-        br(),
-        h3("Forecasts: equal weighted"),
-        htmlOutput("forecasted_years"),
-        height = NULL, solidHeader = TRUE, 
-        status = "info",
-        footer ="Accuracy is the result of 100-MAPE:"
-      ),
-    
-      
-      box(DTOutput("forecasts"), 
-          downloadButton(
-            outputId = "downloadButton",
-            label = "Download Data"
-          ),
-          title = "Data", 
-          height = NULL, 
-          solidHeader = TRUE, 
-          status = "success"),
-    ), # end fluidrow
-    
-    tags$div(style = "position:fixed;bottom:0;width:100%;background-color:#f5f5f5;text-align:center;padding:5px;", "Developed by Marcelo Katogui")
-    
-  ), # end dashboardBody
-  
-) # end dashboardPage
+# UI
+ui <- fluidPage(
+  titlePanel("🌽 Corn: Area Harvested Forecast"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("country", "Select a country:", choices = Countries, selected = "Argentina", multiple = FALSE, selectize = TRUE),
+      actionButton("submit", "Generate Plot", class = "btn-primary btn-lg"),
+      br(),
+      h4("Download Forecast Data"),
 
+      downloadButton("downloadButton", "Download Excel", class = "btn-warning"),
+      
+      br(), br(),
+      div(style = "text-align: center; font-size: 14px; color: gray;", "Developed by Marcelo Katogui")
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Forecast Dashboard", 
+                 fluidRow(
+                   column(8, plotlyOutput("plot")),
+                   column(4,
+                          h4("📊 Forecasting Details"),
+                          p("This tool applies ARIMA, ETS, NNETAR, and TBATS models to predict the area to be harvested in hectares."),
+                          h4("Forecast Accuracy"),
+                          htmlOutput("table"),
+                          h4("Forecasts (Equal Weighted)"),
+                          htmlOutput("forecasted_years")
+                   )
+                 )
+        ),
+        tabPanel("Forecast Data", 
+                 fluidRow(
+                   column(12, DTOutput("forecasts"))
+                 )
+        )
+      )
+    )
+  )
+)
 
 # Define the server
 server <- function(input, output) {
@@ -126,19 +113,29 @@ server <- function(input, output) {
   output$table <- renderText({stargazer(t(accuracy_data()),type = "html")})
   
   output$forecasted_years <- renderTable({
-    Year <- ((forecasts_data()%>%filter(Year %in% c(2021:2023)))$Year)
-    Area_Harvested <- (forecasts_data()%>%filter(Year %in% c(2021:2023)))[,2]
-    Area_Harvested_Forecasted <- (rowMeans((forecasts_data()%>%filter(Year %in% c(2021:2023)))[,3:6]))
+    startEnd <- 2021:2025
+    Year <- ((forecasts_data()%>%filter(Year %in% startEnd))$Year)
+    Area_Harvested <- (forecasts_data()%>%filter(Year %in% startEnd))[,2]
+    Area_Harvested_Forecasted <- (rowMeans((forecasts_data()%>%filter(Year %in% startEnd))[,3:6]))
 
     data.frame(
       Year = format(Year,digits = 1),
       cbind(Area_Harvested=format(Area_Harvested,big.mark = ","), Area_Harvested_Forecasted=format(Area_Harvested_Forecasted,big.mark = ","))
     )
   })
-
+  
   output$forecasts <- renderDataTable({
-    datatable(forecasts_data() %>% arrange(desc(Year)), rownames = FALSE)
+    datatable(
+      forecasts_data() %>%
+        arrange(desc(Year)),  # Sort the data by Year, descending
+      rownames = FALSE,
+      options = list(
+        pageLength = 15
+      )
+    )
   })
+  
+  
   
   output$downloadButton <- downloadHandler(
     filename = function() {paste("data-", Sys.Date(), ".xlsx", sep="")},
