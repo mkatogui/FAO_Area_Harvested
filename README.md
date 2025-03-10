@@ -1,7 +1,7 @@
 # Working with data from FAO
 
 ## Scraping FAO data and forecasting Area Harvested
-## Project Description
+### Project Description
 
 This project involves scraping data from a website, followed by transforming and generating models to make predictions. The output is presented in a shiny app, which allows the user to interact with the data by selecting the desired country.
 
